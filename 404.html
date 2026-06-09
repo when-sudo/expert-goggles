@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黄梅戏科普问答小游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        /* 全局古风样式 */
+        body {
+            background: linear-gradient(rgba(255,253,245,0.9), rgba(255,253,245,0.9)), url("https://img.qqzhi.com/uploads/2025-03-30/772e2b0b5e0c4f4a8e9d12b5a4eeb565.jpg");
+            background-size: cover;
+            background-attachment: fixed;
+            color: #3d2b1f;
+            min-height: 100vh;
+        }
+
+        /* 页面容器 - 控制多页面切换 */
+        .page {
+            width: 90%;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: rgba(255, 250, 240, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(139, 117, 97, 0.2);
+            display: none; /* 默认隐藏所有页面 */
+        }
+
+        /* 默认显示首页 */
+        #home-page {
+            display: block;
+        }
+
+        /* 标题样式 */
+        .title {
+            text-align: center;
+            font-size: 32px;
+            color: #9c5a1f;
+            margin-bottom: 30px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(156,90,31,0.2);
+        }
+
+        /* 按钮样式 */
+        .btn {
+            display: block;
+            width: 200px;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            background: #9c5a1f;
+            color: #fff;
+            font-size: 18px;
+            border: none;
+            border-radius: 25px;
+            margin: 20px auto;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #b46b32;
+            transform: scale(1.05);
+        }
+
+        /* 首页内容 */
+        .intro {
+            font-size: 16px;
+            line-height: 1.8;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        /* 答题页样式 */
+        .question-box {
+            margin: 30px 0;
+        }
+
+        .question {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #6d4c2d;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            padding: 15px;
+            background: #fff8ec;
+            border: 2px solid #d9b38c;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option:hover {
+            background: #f3e5d1;
+            border-color: #9c5a1f;
+        }
+
+        .option.selected {
+            background: #9c5a1f;
+            color: white;
+            border-color: #9c5a1f;
+        }
+
+        /* 进度条 */
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: #f0e6d6;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #9c5a1f;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        /* 结果页样式 */
+        .result-box {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .score {
+            font-size: 40px;
+            color: #9c5a1f;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .result-text {
+            font-size: 18px;
+            margin: 15px 0;
+        }
+
+        /* 题号提示 */
+        .num {
+            text-align: center;
+            font-size: 16px;
+            color: #888;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 页面1：首页 -->
+<div id="home-page" class="page">
+    <h1 class="title">黄梅戏科普问答小游戏</h1>
+    <p class="intro">黄梅戏是中国五大戏曲剧种之一，国家级非物质文化遗产</p>
+    <p class="intro">快来测试一下你对黄梅戏的了解程度吧！</p>
+    <button class="btn" onclick="startNewGame()">开始答题</button>
+</div>
+
+<!-- 页面2：答题页 -->
+<div id="quiz-page" class="page">
+    <h1 class="title">黄梅戏知识问答</h1>
+    <div class="num">第 <span id="current-num">1</span> 题 / 共 10 题</div>
+    <div class="progress">
+        <div id="progress-bar" class="progress-bar" style="width: 10%;"></div>
+    </div>
+    <div class="question-box">
+        <div id="question" class="question">题目加载中...</div>
+        <div class="options" id="options">
+            <div class="option" onclick="selectOption(0)">选项1</div>
+            <div class="option" onclick="selectOption(1)">选项2</div>
+            <div class="option" onclick="selectOption(2)">选项3</div>
+            <div class="option" onclick="selectOption(3)">选项4</div>
+        </div>
+    </div>
+    <button class="btn" onclick="nextQuestion()">下一题</button>
+</div>
+
+<!-- 页面3：结果页 -->
+<div id="result-page" class="page">
+    <h1 class="title">答题结束</h1>
+    <div class="result-box">
+        <div class="score" id="score">0</div>
+        <div class="result-text" id="result-desc">正在生成结果...</div>
+        <div class="correct-num" id="correct-num">答对：0/10 题</div>
+    </div>
+    <button class="btn" onclick="restartGame()">重新开始</button>
+    <button class="btn" onclick="backToHome()">返回首页</button>
+</div>
+
+<script>
+    // 黄梅戏科普题库
+    const quizData = [
+        {
+            question: "黄梅戏起源于我国哪个省份？",
+            options: ["安徽", "湖北", "江苏", "浙江"],
+            answer: 0
+        },
+        {
+            question: "以下哪部是黄梅戏的经典代表作？",
+            options: ["《贵妃醉酒》", "《天仙配》", "《花木兰》", "《定军山》"],
+            answer: 1
+        },
+        {
+            question: "黄梅戏原名是什么？",
+            options: ["采茶戏", "花鼓戏", "黄梅调", "徽剧"],
+            answer: 2
+        },
+        {
+            question: "《天仙配》的主角是哪两位？",
+            options: ["梁山伯与祝英台", "董永与七仙女", "许仙与白娘子", "牛郎与织女"],
+            answer: 1
+        },
+        {
+            question: "黄梅戏属于我国第几批国家级非物质文化遗产？",
+            options: ["第一批", "第二批", "第三批", "第四批"],
+            answer: 0
+        },
+        {
+            question: "以下哪位是著名的黄梅戏表演艺术家？",
+            options: ["梅兰芳", "严凤英", "程砚秋", "尚小云"],
+            answer: 1
+        },
+        {
+            question: "黄梅戏的唱腔特点是？",
+            options: ["高亢激昂", "委婉清新", "雄浑粗犷", "铿锵有力"],
+            answer: 1
+        },
+        {
+            question: "《女驸马》是黄梅戏的经典剧目，主角是谁？",
+            options: ["冯素珍", "林黛玉", "崔莺莺", "杜丽娘"],
+            answer: 0
+        },
+        {
+            question: "黄梅戏主要流行于我国哪个地区？",
+            options: ["西南地区", "华南地区", "长江中下游地区", "西北地区"],
+            answer: 2
+        },
+        {
+            question: "以下哪项不是黄梅戏的经典剧目？",
+            options: ["《牛郎织女》", "《打猪草》", "《锁麟囊》", "《夫妻观灯》"],
+            answer: 2
+        }
+    ];
+
+    // 全局变量
+    let currentQuestion = 0;
+    let selectedAnswer = -1;
+    let score = 0;
+
+    // 页面切换
+    function switchPage(hideId, showId) {
+        document.getElementById(hideId).style.display = "none";
+        document.getElementById(showId).style.display = "block";
+    }
+
+    // 重置所有游戏数据（清空选择、进度、分数、题号）
+    function resetGameData() {
+        currentQuestion = 0;
+        selectedAnswer = -1;
+        score = 0;
+        // 清除所有选项选中状态
+        document.querySelectorAll(".option").forEach(item => {
+            item.classList.remove("selected");
+        });
+    }
+
+    // 首页点击【开始答题】：先重置再进入答题页
+    function startNewGame() {
+        resetGameData();
+        loadQuestion();
+        switchPage("home-page", "quiz-page");
+    }
+
+    // 返回首页：重置数据 + 切到首页
+    function backToHome() {
+        resetGameData();
+        switchPage("result-page", "home-page");
+    }
+
+    // 加载当前题目
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        document.getElementById("question").innerText = q.question;
+        const optionEls = document.querySelectorAll(".option");
+        optionEls.forEach((el, index) => {
+            el.innerText = q.options[index];
+            el.classList.remove("selected");
+        });
+        selectedAnswer = -1;
+        // 更新题号和进度条
+        document.getElementById("current-num").innerText = currentQuestion + 1;
+        const progress = ((currentQuestion + 1) / quizData.length) * 100;
+        document.getElementById("progress-bar").style.width = progress + "%";
+    }
+
+    // 选择答案
+    function selectOption(index) {
+        const optionEls = document.querySelectorAll(".option");
+        optionEls.forEach(el => el.classList.remove("selected"));
+        optionEls[index].classList.add("selected");
+        selectedAnswer = index;
+    }
+
+    // 下一题
+    function nextQuestion() {
+        if (selectedAnswer === -1) {
+            alert("请选择一个答案哦！");
+            return;
+        }
+        if (selectedAnswer === quizData[currentQuestion].answer) {
+            score += 10;
+        }
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    // 显示结果
+    function showResult() {
+        document.getElementById("score").innerText = score + " 分";
+        document.getElementById("correct-num").innerText = `答对：${score/10}/${quizData.length} 题`;
+        let desc = "";
+        if (score === 100) {
+            desc = "🎉 你是黄梅戏小专家！太厉害了！";
+        } else if (score >= 80) {
+            desc = "👍 你对黄梅戏了解很深，很棒！";
+        } else if (score >= 60) {
+            desc = "😊 基础知识掌握得不错，继续加油！";
+        } else {
+            desc = "🌱 多学习黄梅戏知识，下次一定更好！";
+        }
+        document.getElementById("result-desc").innerText = desc;
+        switchPage("quiz-page", "result-page");
+    }
+
+    // 结果页【重新开始】
+    function restartGame() {
+        resetGameData();
+        loadQuestion();
+        switchPage("result-page", "quiz-page");
+    }
+
+    window.onload = function() {
+        loadQuestion();
+    };
+</script>
+</body>
+</html>
